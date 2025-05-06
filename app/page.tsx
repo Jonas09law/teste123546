@@ -23,21 +23,33 @@ export default function Home() {
   // Lanyard Discord Activities
   const [lanyard, setLanyard] = useState<any>(null)
   const [isLoadingLanyard, setIsLoadingLanyard] = useState(false)
+  const [lastUpdatedLanyard, setLastUpdatedLanyard] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchLanyard = () => {
-      setIsLoadingLanyard(true)
-      fetch("https://api.lanyard.rest/v1/users/1113945518071107705")
-        .then(res => res.json())
-        .then(data => setLanyard(data.data))
-        .catch(err => console.error("Erro ao carregar atividades do Lanyard:", err))
-        .finally(() => setIsLoadingLanyard(false))
+    const fetchLanyard = async () => {
+      try {
+        setIsLoadingLanyard(true)
+        console.log("Buscando atividades do Lanyard...")
+        const response = await fetch("https://api.lanyard.rest/v1/users/1113945518071107705")
+        if (!response.ok) throw new Error(`Erro na API do Lanyard: ${response.status}`)
+        const data = await response.json()
+        setLanyard(data.data)
+        setLastUpdatedLanyard(new Date().toLocaleTimeString("pt-BR"))
+        console.log("Atividades do Lanyard atualizadas:", data.data)
+      } catch (err) {
+        console.error("Erro ao carregar atividades do Lanyard:", err)
+      } finally {
+        setIsLoadingLanyard(false)
+      }
     }
 
     fetchLanyard() // Carrega imediatamente
     const interval = setInterval(fetchLanyard, 30000) // Atualiza a cada 30 segundos
 
-    return () => clearInterval(interval) // Limpa o intervalo
+    return () => {
+      console.log("Limpando intervalo do Lanyard")
+      clearInterval(interval)
+    }
   }, [])
 
   const avatarUrl = lanyard && lanyard.discord_user && lanyard.discord_user.avatar
@@ -207,6 +219,11 @@ export default function Home() {
                   <span className="text-xs text-[#4a4a46]/80">Discord Atividades</span>
                   {isLoadingLanyard && (
                     <span className="text-xs text-[#4a4a46]/60 ml-2">Atualizando...</span>
+                  )}
+                  {lastUpdatedLanyard && !isLoadingLanyard && (
+                    <span className="text-xs text-[#4a4a46]/60 ml-2">
+                      Última atualização: {lastUpdatedLanyard}
+                    </span>
                   )}
                 </div>
                 {lanyard ? (
