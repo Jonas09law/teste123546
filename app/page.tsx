@@ -23,32 +23,57 @@ export default function Home() {
   // Lanyard Discord Activities
   const [lanyard, setLanyard] = useState<any>(null)
   const [isLoadingLanyard, setIsLoadingLanyard] = useState(false)
-  const [lastUpdatedLanyard, setLastUpdatedLanyard] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchLanyard = async () => {
-      try {
-        setIsLoadingLanyard(true)
-        console.log("Buscando atividades do Lanyard...")
-        const response = await fetch("https://api.lanyard.rest/v1/users/1113945518071107705")
-        if (!response.ok) throw new Error(`Erro na API do Lanyard: ${response.status}`)
-        const data = await response.json()
-        setLanyard(data.data)
-        setLastUpdatedLanyard(new Date().toLocaleTimeString("pt-BR"))
-        console.log("Atividades do Lanyard atualizadas:", data.data)
-      } catch (err) {
-        console.error("Erro ao carregar atividades do Lanyard:", err)
-      } finally {
+    setIsLoadingLanyard(true)
+    const ws = new WebSocket("wss://api.lanyard.rest/socket")
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      console.log("Dados recebidos do Lanyard WebSocket:", data)
+      if (data.t === "INIT_STATE" || data.t === "PRESENCE_UPDATE") {
+        setLanyard(data.d)
         setIsLoadingLanyard(false)
       }
     }
 
-    fetchLanyard() // Carrega imediatamente
-    const interval = setInterval(fetchLanyard, 30000) // Atualiza a cada 30 segundos
+    ws.onopen = () => {
+      console.log("WebSocket do Lanyard conectado")
+      ws.send(JSON.stringify({
+        op: 2,
+        d: { subscribe_to_id: "1113945518071107705" },
+      }))
+      // Envia heartbeat a cada 30 segundos
+      const heartbeatInterval = setInterval(() => {
+        ws.send(JSON.stringify({ op: 3 }))
+      }, 30000)
+      // Armazena o intervalo para limpeza
+      ws.heartbeatInterval = heartbeatInterval
+    }
+
+    ws.onerror = (error) => {
+      console.error("Erro no WebSocket do Lanyard:", error)
+      setIsLoadingLanyard(false)
+    }
+
+    ws.onclose = () => {
+      console.log("WebSocket do Lanyard fechado, tentando reconectar...")
+      setIsLoadingLanyard(false)
+      // Opcional: Tentar reconectar após 5 segundos
+      setTimeout(() => {
+        const newWs = new WebSocket("wss://api.lanyard.rest/socket")
+        // Reaplicar os eventos do WebSocket
+        newWs.onmessage = ws.onmessage
+        newWs.onopen = ws.onopen
+        newWs.onerror = ws.onerror
+        newWs.onclose = ws.onclose
+      }, 5000)
+    }
 
     return () => {
-      console.log("Limpando intervalo do Lanyard")
-      clearInterval(interval)
+      console.log("Limpando WebSocket do Lanyard")
+      clearInterval(ws.heartbeatInterval)
+      ws.close()
     }
   }, [])
 
@@ -219,11 +244,6 @@ export default function Home() {
                   <span className="text-xs text-[#4a4a46]/80">Discord Atividades</span>
                   {isLoadingLanyard && (
                     <span className="text-xs text-[#4a4a46]/60 ml-2">Atualizando...</span>
-                  )}
-                  {lastUpdatedLanyard && !isLoadingLanyard && (
-                    <span className="text-xs text-[#4a4a46]/60 ml-2">
-                      Última atualização: {lastUpdatedLanyard}
-                    </span>
                   )}
                 </div>
                 {lanyard ? (
