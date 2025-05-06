@@ -15,8 +15,9 @@ import {
   Sparkles,
   Star,
   Twitter,
+  Music,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 export default function Home() {
   // Lanyard Discord Activities
@@ -53,6 +54,21 @@ export default function Home() {
       })
   }, [])
 
+  // Audio control
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
+
+  const toggleAudio = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause()
+      } else {
+        audioRef.current.play().catch(err => console.error("Erro ao tocar áudio:", err))
+      }
+      setIsPlaying(!isPlaying)
+    }
+  }
+
   const gridColors = [
     "#3a3a36", "#444441", "#4a4a46", "#353532", "#393936",
     "#2d2d2a", "#232321", "#363632", "#41413d", "#2a2a28"
@@ -79,7 +95,7 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-xl font-medium tracking-tight flex items-center gap-1.5">
-                Marcelo Souza
+                  Marcelo Souza
                   <Command className="w-3.5 h-3.5 text-[#4a4a46]/50" />
                 </h1>
                 <div className="flex items-center gap-1.5">
@@ -212,6 +228,35 @@ export default function Home() {
                   <div className="text-xs text-[#4a4a46]/60">Carregando atividades...</div>
                 )}
               </div>
+            </div>
+
+            {/* Audio widget */}
+            <div className="sm:col-span-1 row-span-1">
+              <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 hover:border-[#4a4a46]/50 transition-colors h-full flex flex-col group">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Music className="w-3.5 h-3.5 text-[#4a4a46]/80" />
+                    <span className="text-xs text-[#4a4a46]/80 group-hover:text-[#4a4a46] transition-colors">
+                      Música
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-1 flex flex-col items-center justify-center">
+                  <button
+                    onClick={toggleAudio}
+                    aria-label={isPlaying ? "Pausar música" : "Tocar música"}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-[#232321] rounded-md border border-[#3a3a36] text-[#4a4a46] hover:bg-[#4a4a46] hover:text-[#262624] transition-colors"
+                  >
+                    {isPlaying ? (
+                      <span>Pausar</span>
+                    ) : (
+                      <span>Tocar</span>
+                    )}
+                    <Music className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <audio ref={audioRef} src="/musicasite.mp3" preload="auto" />
             </div>
 
             {/* Skills widget */}
