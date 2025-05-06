@@ -325,7 +325,7 @@ export default function Home() {
                     rel="noopener noreferrer"
                     className="text-xs text-[#4a4a46]/60 hover:text-[#4a4a46] px-2 py-1 rounded bg-[#232321] border border-[#3a3a36] ml-auto"
                   >
-                    @marceloexpress_
+                    @darkzinn2
                   </a>
                 </div>
                 <div className="flex justify-center items-center w-full">
