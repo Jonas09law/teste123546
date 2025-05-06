@@ -469,7 +469,7 @@ export default function Home() {
               </p>
             </div>
             <a
-              href="marceloexpress9@gmail.com"
+              href="mailto:marceloexpress9@gmail.com"
               className="px-3 py-1.5 border border-[#4a4a46]/50 rounded-sm hover:bg-[#4a4a46] hover:text-[#262624] transition-all text-[#4a4a46]/80 hover:border-[#4a4a46] flex items-center gap-1.5"
             >
               <Mail className="w-3.5 h-3.5" />
