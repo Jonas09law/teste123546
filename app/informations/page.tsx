@@ -70,7 +70,7 @@ export default function Informations() {
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
               <span>Voltar</span>
             </Link>
-            <h1 className="text-lg font-medium">Informations</h1>
+            <h1 className="text-lg font-medium">Informações</h1>
           </div>
 
           {/* Skills Section */}
