@@ -408,7 +408,7 @@ export default function Home() {
                   <span className="text-sm font-medium text-[#4a4a46]">Informações</span>
                 </div>
                 <span className="text-xs text-[#4a4a46]/60 group-hover:text-[#4a4a46] transition-colors">
-                  About Me • Skills • Experience
+                  Skills 
                 </span>
               </Link>
             </div>
