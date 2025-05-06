@@ -22,36 +22,83 @@ import { useEffect, useState, useRef } from "react"
 export default function Home() {
   // Lanyard Discord Activities
   const [lanyard, setLanyard] = useState<any>(null)
+  const [isLoadingLanyard, setIsLoadingLanyard] = useState(false)
+
   useEffect(() => {
-    fetch("https://api.lanyard.rest/v1/users/1113945518071107705")
-      .then(res => res.json())
-      .then(data => setLanyard(data.data))
+    const fetchLanyard = () => {
+      setIsLoadingLanyard(true)
+      fetch("https://api.lanyard.rest/v1/users/1113945518071107705")
+        .then(res => res.json())
+        .then(data => setLanyard(data.data))
+        .catch(err => console.error("Erro ao carregar atividades do Lanyard:", err))
+        .finally(() => setIsLoadingLanyard(false))
+    }
+
+    fetchLanyard() // Carrega imediatamente
+    const interval = setInterval(fetchLanyard, 30000) // Atualiza a cada 30 segundos
+
+    return () => clearInterval(interval) // Limpa o intervalo
   }, [])
 
   const avatarUrl = lanyard && lanyard.discord_user && lanyard.discord_user.avatar
     ? `https://cdn.discordapp.com/avatars/${lanyard.discord_user.id}/${lanyard.discord_user.avatar}.${lanyard.discord_user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256`
-    : '/placeholder.svg';
+    : '/placeholder.svg'
 
   // GitHub Activity
   const [githubEvents, setGithubEvents] = useState<any[]>([])
+  const [isLoadingGithubEvents, setIsLoadingGithubEvents] = useState(false)
+
   useEffect(() => {
-    fetch("https://api.github.com/users/zayzinha/events/public")
-      .then(res => res.json())
-      .then(data => Array.isArray(data) ? setGithubEvents(data.slice(0, 5)) : setGithubEvents([]))
+    const fetchGithubEvents = () => {
+      setIsLoadingGithubEvents(true)
+      fetch("https://api.github.com/users/zayzinha/events/public")
+        .then(res => res.json())
+        .then(data => Array.isArray(data) ? setGithubEvents(data.slice(0, 5)) : setGithubEvents([]))
+        .catch(err => console.error("Erro ao carregar eventos do GitHub:", err))
+        .finally(() => setIsLoadingGithubEvents(false))
+    }
+
+    fetchGithubEvents() // Carrega imediatamente
+    const interval = setInterval(fetchGithubEvents, 60000) // Atualiza a cada 60 segundos
+
+    return () => clearInterval(interval)
   }, [])
 
   // GitHub stats
   const [githubStats, setGithubStats] = useState({ stars: 0, forks: 0, repos: 0 })
+  const [isLoadingGithubStats, setIsLoadingGithubStats] = useState(false)
+
   useEffect(() => {
-    fetch('https://api.github.com/users/zayzinha/repos?per_page=100')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          const stars = data.reduce((acc, repo) => acc + (repo.stargazers_count || 0), 0)
-          const forks = data.reduce((acc, repo) => acc + (repo.forks_count || 0), 0)
-          setGithubStats({ stars, forks, repos: data.length })
-        }
-      })
+    const fetchGithubStats = () => {
+      setIsLoadingGithubStats(true)
+      fetch('https://api.github.com/users/zayzinha/repos?per_page=100')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            const stars = data.reduce((acc, repo) => acc + (repo.stargazers_count || 0), 0)
+            const forks = data.reduce((acc, repo) => acc + (repo.forks_count || 0), 0)
+            setGithubStats({ stars, forks, repos: data.length })
+          }
+        })
+        .catch(err => console.error("Erro ao carregar estatísticas do GitHub:", err))
+        .finally(() => setIsLoadingGithubStats(false))
+    }
+
+    fetchGithubStats() // Carrega imediatamente
+    const interval = setInterval(fetchGithubStats, 60000) // Atualiza a cada 60 segundos
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Local Time
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000) // Atualiza a cada 1 segundo
+
+    return () => clearInterval(interval)
   }, [])
 
   // Audio control
@@ -72,7 +119,7 @@ export default function Home() {
   const gridColors = [
     "#3a3a36", "#444441", "#4a4a46", "#353532", "#393936",
     "#2d2d2a", "#232321", "#363632", "#41413d", "#2a2a28"
-  ];
+  ]
 
   return (
     <div className="min-h-screen bg-[#262624] text-[#4a4a46] relative">
@@ -148,7 +195,7 @@ export default function Home() {
 
           {/* Grid layout for widgets */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Spotify widget (agora mostra atividades do Lanyard) */}
+            {/* Spotify widget (mostra atividades do Lanyard) */}
             <div className="sm:col-span-2 row-span-1">
               <div className="flex flex-col h-full bg-gradient-to-br from-[#1e1e1c] to-[#232321] rounded-md border border-[#3a3a36] p-3 transition-colors shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
@@ -158,6 +205,9 @@ export default function Home() {
                     </svg>
                   </div>
                   <span className="text-xs text-[#4a4a46]/80">Discord Atividades</span>
+                  {isLoadingLanyard && (
+                    <span className="text-xs text-[#4a4a46]/60 ml-2">Atualizando...</span>
+                  )}
                 </div>
                 {lanyard ? (
                   lanyard.activities && lanyard.activities.length > 0 ? (
@@ -363,6 +413,9 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-[#4a4a46]" />
                     <span className="text-xs text-[#4a4a46]/80">GitHub Activity</span>
+                    {isLoadingGithubEvents && (
+                      <span className="text-xs text-[#4a4a46]/60 ml-2">Atualizando...</span>
+                    )}
                   </div>
                   <a
                     href="https://github.com/darkzinn2"
@@ -396,9 +449,25 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="flex justify-between items-center text-xs text-[#4a4a46]/60 mt-2">
-                  <span><svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1.724 1.724 0 002.573.982c.797-.545 1.8.253 1.257 1.05a1.724 1.724 0 00.982 2.573c.921.3.921 1.603 0 1.902a1.724 1.724 0 00-.982 2.573c.545.797-.253 1.8-1.05 1.257a1.724 1.724 0 00-2.573.982c-.3.921-1.603.921-1.902 0a1.724 1.724 0 00-2.573-.982c-.797.545-1.8-.253-1.257-1.05a1.724 1.724 0 00-.982-2.573c-.921-.3-.921-1.603 0-1.902a1.724 1.724 0 00.982-2.573c-.545-.797.253-1.8 1.05-1.257.73.5 1.7.5 2.43 0z" /></svg> {githubStats.stars} stars</span>
-                  <span><svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 7v10M17 7v10M7 7h10M7 17h10M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z" /></svg> {githubStats.forks} forks</span>
-                  <span><svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7" /><path strokeLinecap="round" strokeLinejoin="round" d="M16 3v4M8 3v4M4 7h16" /></svg> {githubStats.repos} repos</span>
+                  <span>
+                    <svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1.724 1.724 0 002.573.982c.797-.545 1.8.253 1.257 1.05a1.724 1.724 0 00.982 2.573c.921.3.921 1.603 0 1.902a1.724 1.724 0 00-.982 2.573c.545.797-.253 1.8-1.05 1.257a1.724 1.724 0 00-2.573.982c-.3.921-1.603.921-1.902 0a1.724 1.724 0 00-2.573-.982c-.797.545-1.8-.253-1.257-1.05a1.724 1.724 0 00-.982-2.573c-.921-.3-.921-1.603 0-1.902a1.724 1.724 0 00.982-2.573c-.545-.797.253-1.8 1.05-1.257.73.5 1.7.5 2.43 0z" />
+                    </svg> 
+                    {isLoadingGithubStats ? "..." : githubStats.stars} stars
+                  </span>
+                  <span>
+                    <svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 7v10M17 7v10M7 7h10M7 17h10M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z" />
+                    </svg> 
+                    {isLoadingGithubStats ? "..." : githubStats.forks} forks
+                  </span>
+                  <span>
+                    <svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 3v4M8 3v4M4 7h16" />
+                    </svg> 
+                    {isLoadingGithubStats ? "..." : githubStats.repos} repos
+                  </span>
                 </div>
               </div>
             </div>
@@ -418,24 +487,24 @@ export default function Home() {
                 <div className="flex-1 flex flex-col items-center justify-center">
                   <div className="flex items-baseline">
                     <span className="text-2xl font-medium text-[#4a4a46]">
-                      {new Date().getHours()}:{String(new Date().getMinutes()).padStart(2, "0")}
+                      {currentTime.getHours()}:{String(currentTime.getMinutes()).padStart(2, "0")}
                     </span>
                     <span className="text-xs text-[#4a4a46]/50 ml-1">
-                      {String(new Date().getSeconds()).padStart(2, "0")}
+                      {String(currentTime.getSeconds()).padStart(2, "0")}
                     </span>
                   </div>
                   <div className="flex items-center gap-1 mt-2 text-xs text-[#4a4a46]/70">
                     <Calendar className="w-3 h-3" />
                     <span>
-                      {new Date().toLocaleDateString("pt-BR", { weekday: "short" })}, {new Date().getDate()}{" "}
-                      {new Date().toLocaleDateString("pt-BR", { month: "short" })}
+                      {currentTime.toLocaleDateString("pt-BR", { weekday: "short" })}, {currentTime.getDate()}{" "}
+                      {currentTime.toLocaleDateString("pt-BR", { month: "short" })}
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center justify-center pt-2 mt-2 border-t border-[#3a3a36]">
                   <div className="flex items-center gap-1 text-[10px] text-[#4a4a46]/60">
                     <span>
-                      Semana {Math.ceil(new Date().getDate() / 7)} • {new Date().getFullYear()}
+                      Semana {Math.ceil(currentTime.getDate() / 7)} • {currentTime.getFullYear()}
                     </span>
                   </div>
                 </div>
