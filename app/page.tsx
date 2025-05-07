@@ -43,11 +43,9 @@ export default function Home() {
         op: 2,
         d: { subscribe_to_id: "1113945518071107705" },
       }))
-      // Envia heartbeat a cada 30 segundos
       const heartbeatInterval = setInterval(() => {
         ws.send(JSON.stringify({ op: 3 }))
       }, 30000)
-      // Armazena o intervalo para limpeza
       ws.heartbeatInterval = heartbeatInterval
     }
 
@@ -59,10 +57,8 @@ export default function Home() {
     ws.onclose = () => {
       console.log("WebSocket do Lanyard fechado, tentando reconectar...")
       setIsLoadingLanyard(false)
-      // Opcional: Tentar reconectar após 5 segundos
       setTimeout(() => {
         const newWs = new WebSocket("wss://api.lanyard.rest/socket")
-        // Reaplicar os eventos do WebSocket
         newWs.onmessage = ws.onmessage
         newWs.onopen = ws.onopen
         newWs.onerror = ws.onerror
@@ -95,8 +91,8 @@ export default function Home() {
         .finally(() => setIsLoadingGithubEvents(false))
     }
 
-    fetchGithubEvents() // Carrega imediatamente
-    const interval = setInterval(fetchGithubEvents, 60000) // Atualiza a cada 60 segundos
+    fetchGithubEvents()
+    const interval = setInterval(fetchGithubEvents, 60000)
 
     return () => clearInterval(interval)
   }, [])
@@ -121,8 +117,8 @@ export default function Home() {
         .finally(() => setIsLoadingGithubStats(false))
     }
 
-    fetchGithubStats() // Carrega imediatamente
-    const interval = setInterval(fetchGithubStats, 60000) // Atualiza a cada 60 segundos
+    fetchGithubStats()
+    const interval = setInterval(fetchGithubStats, 60000)
 
     return () => clearInterval(interval)
   }, [])
@@ -133,7 +129,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date())
-    }, 1000) // Atualiza a cada 1 segundo
+    }, 1000)
 
     return () => clearInterval(interval)
   }, [])
@@ -159,7 +155,29 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#262624] text-[#4a4a46] relative">
+    <div className={`min-h-screen bg-[#262624] text-[#4a4a46] relative ${isPlaying ? 'bg-gradient-to-r from-[#1e1e1c] to-[#1db954] animate-pulse' : ''}`}>
+      <style>
+        {`
+          .animate-pulse {
+            animation: pulse 2s infinite;
+          }
+
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+          }
+
+          .scale-105 {
+            transform: scale(1.05);
+            transition: transform 0.3s ease-in-out;
+          }
+
+          .bg-gradient-to-r {
+            background: linear-gradient(to right, #1e1e1c, #1db954);
+            transition: background 0.5s ease;
+          }
+        `}
+      </style>
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
@@ -178,12 +196,12 @@ export default function Home() {
                 <img src={avatarUrl} alt="Avatar" className="object-cover w-10 h-10" />
               </div>
               <div>
-                <h1 className="text-xl font-medium tracking-tight flex items-center gap-1.5">
+                <h1 className={`text-xl font-medium tracking-tight flex items-center gap-1.5 ${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]'}`}>
                   Marcelo Souza
                   <Command className="w-3.5 h-3.5 text-[#4a4a46]/50" />
                 </h1>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-[#4a4a46]/70">Developer</span>
+                  <span className={`text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>Developer</span>
                 </div>
               </div>
             </div>
@@ -234,16 +252,16 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Spotify widget (mostra atividades do Lanyard) */}
             <div className="sm:col-span-2 row-span-1">
-              <div className="flex flex-col h-full bg-gradient-to-br from-[#1e1e1c] to-[#232321] rounded-md border border-[#3a3a36] p-3 transition-colors shadow-sm">
+              <div className={`flex flex-col h-full bg-gradient-to-br from-[#1e1e1c] to-[#232321] rounded-md border border-[#3a3a36] p-3 transition-colors shadow-sm ${isPlaying ? 'scale-105 shadow-lg' : ''}`}>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex-shrink-0 w-5 h-5 text-[#4a4a46] animate-pulse">
                     <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" />
                     </svg>
                   </div>
-                  <span className="text-xs text-[#4a4a46]/80">Discord Atividades</span>
+                  <span className={`text-xs ${isPlaying ? 'text-[#1db954]/80' : 'text-[#4a4a46]/80'}`}>Discord Atividades</span>
                   {isLoadingLanyard && (
-                    <span className="text-xs text-[#4a4a46]/60 ml-2">Atualizando...</span>
+                    <span className={`text-xs ${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'} ml-2`}>Atualizando...</span>
                   )}
                 </div>
                 {lanyard ? (
@@ -289,14 +307,14 @@ export default function Home() {
                               )
                         }
                         <div>
-                          <div className="font-medium text-[#4a4a46] text-sm">{activity.name}</div>
-                          <div className="text-xs text-[#4a4a46]/70">{activity.details || activity.state || 'Ativo'}</div>
+                          <div className={`font-medium text-sm ${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]'}`}>{activity.name}</div>
+                          <div className={`text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>{activity.details || activity.state || 'Ativo'}</div>
                           {activity.type === 2 && activity.name === 'Spotify' && lanyard.listening_to_spotify && lanyard.spotify ? (
                             <div className="mt-1 flex items-center gap-2">
                               <img src={lanyard.spotify.album_art_url} alt="Spotify Album" className="w-8 h-8 rounded" />
                               <div>
-                                <div className="text-xs text-[#1db954] font-semibold">{lanyard.spotify.song}</div>
-                                <div className="text-xs text-[#4a4a46]/70">{lanyard.spotify.artist}</div>
+                                <div className={`text-xs font-semibold ${isPlaying ? 'text-[#1db954]' : 'text-[#1db954]'}`}>{lanyard.spotify.song}</div>
+                                <div className={`text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>{lanyard.spotify.artist}</div>
                               </div>
                             </div>
                           ) : null}
@@ -305,25 +323,27 @@ export default function Home() {
                     ))
                   ) : (
                     <div className="flex flex-col items-center justify-center h-32 w-full text-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-[#4a4a46]/60 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className={`w-10 h-10 mb-2 ${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
                       </svg>
-                      <span className="text-sm text-[#4a4a46]/70 font-medium">Provavelmente dormindo,<br/>nenhuma atividade encontrada.</span>
+                      <span className={`text-sm font-medium ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>
+                        Provavelmente dormindo,<br/>nenhuma atividade encontrada.
+                      </span>
                     </div>
                   )
                 ) : (
-                  <div className="text-xs text-[#4a4a46]/60">Carregando atividades...</div>
+                  <div className={`text-xs ${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'}`}>Carregando atividades...</div>
                 )}
               </div>
             </div>
 
             {/* Audio widget */}
             <div className="sm:col-span-1 row-span-1">
-              <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 hover:border-[#4a4a46]/50 transition-colors h-full flex flex-col group">
+              <div className={`bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 hover:border-[#4a4a46]/50 transition-colors h-full flex flex-col group ${isPlaying ? 'scale-105 shadow-lg' : ''}`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Music className="w-3.5 h-3.5 text-[#4a4a46]/80" />
-                    <span className="text-xs text-[#4a4a46]/80 group-hover:text-[#4a4a46] transition-colors">
+                    <Music className={`w-3.5 h-3.5 ${isPlaying ? 'text-[#1db954] animate-pulse' : 'text-[#4a4a46]/80'}`} />
+                    <span className={`text-xs group-hover:text-[#4a4a46] transition-colors ${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]/80'}`}>
                       Música
                     </span>
                   </div>
@@ -332,7 +352,7 @@ export default function Home() {
                   <button
                     onClick={toggleAudio}
                     aria-label={isPlaying ? "Pausar música" : "Tocar música"}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-[#232321] rounded-md border border-[#3a3a36] text-[#4a4a46] hover:bg-[#4a4a46] hover:text-[#262624] transition-colors"
+                    className={`flex items-center gap-2 px-3 py-1.5 bg-[#232321] rounded-md border border-[#3a3a36] text-[#4a4a46] hover:bg-[#4a4a46] hover:text-[#262624] transition-colors ${isPlaying ? 'bg-[#1db954] text-white' : ''}`}
                   >
                     {isPlaying ? (
                       <span>Pausar</span>
@@ -348,15 +368,15 @@ export default function Home() {
 
             {/* Skills widget */}
             <div className="sm:col-span-1 row-span-1">
-              <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] px-3 py-2 hover:border-[#4a4a46]/50 transition-colors group h-auto flex flex-col">
+              <div className={`bg-[#1e1e1c] rounded-md border border-[#3a3a36] px-3 py-2 hover:border-[#4a4a46]/50 transition-colors group h-auto flex flex-col ${isPlaying ? 'scale-105 shadow-lg' : ''}`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <CodeXml className="w-3.5 h-3.5 text-[#4a4a46]/70 group-hover:text-[#4a4a46] transition-colors" />
-                    <span className="text-xs text-[#4a4a46]/80 group-hover:text-[#4a4a46]/90 transition-colors">
+                    <CodeXml className={`w-3.5 h-3.5 ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'} group-hover:text-[#4a4a46] transition-colors`} />
+                    <span className={`text-xs ${isPlaying ? 'text-[#1db954]/80' : 'text-[#4a4a46]/80'} group-hover:text-[#4a4a46]/90 transition-colors`}>
                       Habilidades
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-[#4a4a46]/60">
+                  <div className={`flex items-center gap-1 text-xs ${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'}`}>
                     <Star className="w-3 h-3" />
                     <span>Tecnologias</span>
                   </div>
@@ -365,78 +385,78 @@ export default function Home() {
                   {/* JavaScript */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
-                      <div className="w-full h-full opacity-70 filter grayscale invert flex items-center justify-center">
+                      <div className={`w-full h-full opacity-70 filter ${isPlaying ? '' : 'grayscale'} invert flex items-center justify-center`}>
                         JS
                       </div>
                     </div>
-                    <span className="text-[10px] text-[#4a4a46]/70">JavaScript</span>
+                    <span className={`text-[10px] ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>JavaScript</span>
                     <div className="w-full bg-[#2a2a28] h-[3px] rounded-full">
-                      <div className="bg-[#4a4a46]/60 h-[3px] rounded-full" style={{ width: "90%" }}></div>
+                      <div className={`h-[3px] rounded-full ${isPlaying ? 'bg-[#1db954]/60' : 'bg-[#4a4a46]/60'}`} style={{ width: "90%" }}></div>
                     </div>
                   </div>
 
                   {/* Python */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
-                      <div className="w-full h-full opacity-70 filter grayscale invert flex items-center justify-center">
+                      <div className={`w-full h-full opacity-70 filter ${isPlaying ? '' : 'grayscale'} invert flex items-center justify-center`}>
                         PY
                       </div>
                     </div>
-                    <span className="text-[10px] text-[#4a4a46]/70">Python</span>
+                    <span className={`text-[10px] ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>Python</span>
                     <div className="w-full bg-[#2a2a28] h-[3px] rounded-full">
-                      <div className="bg-[#4a4a46]/60 h-[3px] rounded-full" style={{ width: "85%" }}></div>
+                      <div className={`h-[3px] rounded-full ${isPlaying ? 'bg-[#1db954]/60' : 'bg-[#4a4a46]/60'}`} style={{ width: "85%" }}></div>
                     </div>
                   </div>
 
                   {/* TypeScript */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
-                      <div className="w-full h-full opacity-70 filter grayscale invert flex items-center justify-center">
+                      <div className={`w-full h-full opacity-70 filter ${isPlaying ? '' : 'grayscale'} invert flex items-center justify-center`}>
                         TS
                       </div>
                     </div>
-                    <span className="text-[10px] text-[#4a4a46]/70">TypeScript</span>
+                    <span className={`text-[10px] ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>TypeScript</span>
                     <div className="w-full bg-[#2a2a28] h-[3px] rounded-full">
-                      <div className="bg-[#4a4a46]/60 h-[3px] rounded-full" style={{ width: "85%" }}></div>
+                      <div className={`h-[3px] rounded-full ${isPlaying ? 'bg-[#1db954]/60' : 'bg-[#4a4a46]/60'}`} style={{ width: "85%" }}></div>
                     </div>
                   </div>
 
                   {/* CSS */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
-                      <div className="w-full h-full opacity-70 filter grayscale invert flex items-center justify-center">
+                      <div className={`w-full h-full opacity-70 filter ${isPlaying ? '' : 'grayscale'} invert flex items-center justify-center`}>
                         CSS
                       </div>
                     </div>
-                    <span className="text-[10px] text-[#4a4a46]/70">CSS</span>
+                    <span className={`text-[10px] ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>CSS</span>
                     <div className="w-full bg-[#2a2a28] h-[3px] rounded-full">
-                      <div className="bg-[#4a4a46]/60 h-[3px] rounded-full" style={{ width: "80%" }}></div>
+                      <div className={`h-[3px] rounded-full ${isPlaying ? 'bg-[#1db954]/60' : 'bg-[#4a4a46]/60'}`} style={{ width: "80%" }}></div>
                     </div>
                   </div>
 
                   {/* HTML */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
-                      <div className="w-full h-full opacity-70 filter grayscale invert flex items-center justify-center">
+                      <div className={`w-full h-full opacity-70 filter ${isPlaying ? '' : 'grayscale'} invert flex items-center justify-center`}>
                         HTML
                       </div>
                     </div>
-                    <span className="text-[10px] text-[#4a4a46]/70">HTML</span>
+                    <span className={`text-[10px] ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>HTML</span>
                     <div className="w-full bg-[#2a2a28] h-[3px] rounded-full">
-                      <div className="bg-[#4a4a46]/60 h-[3px] rounded-full" style={{ width: "95%" }}></div>
+                      <div className={`h-[3px] rounded-full ${isPlaying ? 'bg-[#1db954]/60' : 'bg-[#4a4a46]/60'}`} style={{ width: "95%" }}></div>
                     </div>
                   </div>
 
                   {/* React */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
-                      <div className="w-full h-full opacity-70 filter grayscale invert flex items-center justify-center">
+                      <div className={`w-full h-full opacity-70 filter ${isPlaying ? '' : 'grayscale'} invert flex items-center justify-center`}>
                         ⚛️
                       </div>
                     </div>
-                    <span className="text-[10px] text-[#4a4a46]/70">React</span>
+                    <span className={`text-[10px] ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>React</span>
                     <div className="w-full bg-[#2a2a28] h-[3px] rounded-full">
-                      <div className="bg-[#4a4a46]/60 h-[3px] rounded-full" style={{ width: "90%" }}></div>
+                      <div className={`h-[3px] rounded-full ${isPlaying ? 'bg-[#1db954]/60' : 'bg-[#4a4a46]/60'}`} style={{ width: "90%" }}></div>
                     </div>
                   </div>
                 </div>
@@ -445,20 +465,20 @@ export default function Home() {
 
             {/* GitHub activity */}
             <div className="sm:col-span-2 row-span-1">
-              <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 h-full">
+              <div className={`bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 h-full ${isPlaying ? 'scale-105 shadow-lg' : ''}`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-[#4a4a46]" />
-                    <span className="text-xs text-[#4a4a46]/80">GitHub Activity</span>
+                    <Calendar className={`w-4 h-4 ${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]'}`} />
+                    <span className={`text-xs ${isPlaying ? 'text-[#1db954]/80' : 'text-[#4a4a46]/80'}`}>GitHub Activity</span>
                     {isLoadingGithubEvents && (
-                      <span className="text-xs text-[#4a4a46]/60 ml-2">Atualizando...</span>
+                      <span className={`text-xs ${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'} ml-2`}>Atualizando...</span>
                     )}
                   </div>
                   <a
                     href="https://github.com/darkzinn2"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-[#4a4a46]/60 hover:text-[#4a4a46] px-2 py-1 rounded bg-[#232321] border border-[#3a3a36] ml-auto"
+                    className={`text-xs px-2 py-1 rounded bg-[#232321] border border-[#3a3a36] ml-auto ${isPlaying ? 'text-[#1db954]/60 hover:text-[#1db954]' : 'text-[#4a4a46]/60 hover:text-[#4a4a46]'}`}
                   >
                     @darkzinn2
                   </a>
@@ -475,17 +495,17 @@ export default function Home() {
                     {Array.from({ length: 2 * 20 }).map((_, i) => (
                       <div
                         key={i}
-                        className="rounded-md transition-colors duration-200 hover:bg-[#4a4a46]"
+                        className={`rounded-md transition-colors duration-200 ${isPlaying ? 'hover:bg-[#1db954]' : 'hover:bg-[#4a4a46]'}`}
                         style={{
                           width: '24px',
                           height: '24px',
-                          background: gridColors[i % gridColors.length]
+                          background: isPlaying ? '#1db954' : gridColors[i % gridColors.length]
                         }}
                       />
                     ))}
                   </div>
                 </div>
-                <div className="flex justify-between items-center text-xs text-[#4a4a46]/60 mt-2">
+                <div className={`flex justify-between items-center text-xs mt-2 ${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'}`}>
                   <span>
                     <svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1.724 1.724 0 002.573.982c.797-.545 1.8.253 1.257 1.05a1.724 1.724 0 00.982 2.573c.921.3.921 1.603 0 1.902a1.724 1.724 0 00-.982 2.573c.545.797-.253 1.8-1.05 1.257a1.724 1.724 0 00-2.573.982c-.3.921-1.603.921-1.902 0a1.724 1.724 0 00-2.573-.982c-.797.545-1.8-.253-1.257-1.05a1.724 1.724 0 00-.982-2.573c-.921-.3-.921-1.603 0-1.902a1.724 1.724 0 00.982-2.573c-.545-.797.253-1.8 1.05-1.257.73.5 1.7.5 2.43 0z" />
@@ -511,26 +531,26 @@ export default function Home() {
 
             {/* Local time widget */}
             <div className="sm:col-span-1 row-span-1">
-              <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 hover:border-[#4a4a46]/50 transition-colors h-full flex flex-col group">
+              <div className={`bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 hover:border-[#4a4a46]/50 transition-colors h-full flex flex-col group ${isPlaying ? 'scale-105 shadow-lg' : ''}`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5 text-[#4a4a46]/80" />
-                    <span className="text-xs text-[#4a4a46]/80 group-hover:text-[#4a4a46] transition-colors">
+                    <Clock className={`w-3.5 h-3.5 ${isPlaying ? 'text-[#1db954]/80' : 'text-[#4a4a46]/80'}`} />
+                    <span className={`text-xs group-hover:text-[#4a4a46] transition-colors ${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]/80'}`}>
                       Hora local
                     </span>
                   </div>
-                  <Moon className="w-3.5 h-3.5 text-[#4a4a46]/70" />
+                  <Moon className={`w-3.5 h-3.5 ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`} />
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                   <div className="flex items-baseline">
-                    <span className="text-2xl font-medium text-[#4a4a46]">
+                    <span className={`text-2xl font-medium ${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]'}`}>
                       {currentTime.getHours()}:{String(currentTime.getMinutes()).padStart(2, "0")}
                     </span>
-                    <span className="text-xs text-[#4a4a46]/50 ml-1">
+                    <span className={`text-xs ml-1 ${isPlaying ? 'text-[#1db954]/50' : 'text-[#4a4a46]/50'}`}>
                       {String(currentTime.getSeconds()).padStart(2, "0")}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 mt-2 text-xs text-[#4a4a46]/70">
+                  <div className={`flex items-center gap-1 mt-2 text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>
                     <Calendar className="w-3 h-3" />
                     <span>
                       {currentTime.toLocaleDateString("pt-BR", { weekday: "short" })}, {currentTime.getDate()}{" "}
@@ -538,8 +558,8 @@ export default function Home() {
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-center pt-2 mt-2 border-t border-[#3a3a36]">
-                  <div className="flex items-center gap-1 text-[10px] text-[#4a4a46]/60">
+                <div className={`flex items-center justify-center pt-2 mt-2 border-t border-[#3a3a36] ${isPlaying ? 'border-[#1db954]/50' : ''}`}>
+                  <div className={`flex items-center gap-1 text-[10px] ${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'}`}>
                     <span>
                       Semana {Math.ceil(currentTime.getDate() / 7)} • {currentTime.getFullYear()}
                     </span>
@@ -551,14 +571,14 @@ export default function Home() {
             {/* Information link */}
             <div className="sm:col-span-3">
               <Link
-                className="flex items-center justify-between bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 hover:border-[#4a4a46]/50 transition-colors group"
+                className={`flex items-center justify-between bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 hover:border-[#4a4a46]/50 transition-colors group ${isPlaying ? 'scale-105 shadow-lg' : ''}`}
                 href="/informations"
               >
                 <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 text-[#4a4a46]" />
-                  <span className="text-sm font-medium text-[#4a4a46]">Informações</span>
+                  <Info className={`w-4 h-4 ${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]'}`} />
+                  <span className={`text-sm font-medium ${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]'}`}>Informações</span>
                 </div>
-                <span className="text-xs text-[#4a4a46]/60 group-hover:text-[#4a4a46] transition-colors">
+                <span className={`text-xs transition-colors ${isPlaying ? 'text-[#1db954]/60 group-hover:text-[#1db954]' : 'text-[#4a4a46]/60 group-hover:text-[#4a4a46]'}`}>
                   Skills 
                 </span>
               </Link>
@@ -566,44 +586,44 @@ export default function Home() {
 
             {/* Terminal */}
             <div className="sm:col-span-3">
-              <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] overflow-hidden">
-                <div className="flex items-center justify-between px-3 py-2 bg-[#262624] border-b border-[#3a3a36]">
+              <div className={`bg-[#1e1e1c] rounded-md border border-[#3a3a36] overflow-hidden ${isPlaying ? 'scale-105 shadow-lg' : ''}`}>
+                <div className={`flex items-center justify-between px-3 py-2 bg-[#262624] border-b ${isPlaying ? 'border-[#1db954]/50' : 'border-[#3a3a36]'}`}>
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]"></div>
                     <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></div>
                     <div className="w-2.5 h-2.5 rounded-full bg-[#28ca41]"></div>
                   </div>
-                  <div className="text-xs text-[#4a4a46]/70">Terminal</div>
+                  <div className={`text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>Terminal</div>
                   <div className="w-8"></div>
                 </div>
                 <div className="p-3 font-mono text-xs">
                   <div className="flex">
-                    <span className="text-[#4a4a46]/70">$ </span>
-                    <span className="text-[#4a4a46]">cd portfolio</span>
+                    <span className={`text-[#4a4a46]/70 ${isPlaying ? 'text-[#1db954]/70' : ''}`}>$ </span>
+                    <span className={`${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]'}`}>cd portfolio</span>
                   </div>
                   <div className="flex">
-                    <span className="text-[#4a4a46]/70">$ </span>
-                    <span className="text-[#4a4a46]">ls -la</span>
+                    <span className={`text-[#4a4a46]/70 ${isPlaying ? 'text-[#1db954]/70' : ''}`}>$ </span>
+                    <span className={`${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]'}`}>ls -la</span>
                   </div>
-                  <div className="text-[#4a4a46]/80 pl-4 mt-1">
+                  <div className={`pl-4 mt-1 ${isPlaying ? 'text-[#1db954]/80' : 'text-[#4a4a46]/80'}`}>
                     <div>
-                      <span className="text-[#4a4a46]/60">drwxr-xr-x</span> frontend/
+                      <span className={`${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'}`}>drwxr-xr-x</span> frontend/
                     </div>
                     <div>
-                      <span className="text-[#4a4a46]/60">drwxr-xr-x</span> backend/
+                      <span className={`${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'}`}>drwxr-xr-x</span> backend/
                     </div>
                     <div>
-                      <span className="text-[#4a4a46]/60">-rw-r--r--</span> README.md
+                      <span className={`${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'}`}>-rw-r--r--</span> README.md
                     </div>
                     <div>
-                      <span className="text-[#4a4a46]/60">-rw-r--r--</span> package.json
+                      <span className={`${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'}`}>-rw-r--r--</span> package.json
                     </div>
                   </div>
                   <div className="flex mt-1 items-center">
-                    <span className="text-[#4a4a46]/70">$ </span>
-                    <span className="text-[#4a4a46] relative">
+                    <span className={`text-[#4a4a46]/70 ${isPlaying ? 'text-[#1db954]/70' : ''}`}>$ </span>
+                    <span className={`relative ${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]'}`}>
                       npm start
-                      <span className="absolute top-1 right-[-12px] w-2 h-4 bg-[#4a4a46]/80 animate-pulse-subtle"></span>
+                      <span className={`absolute top-1 right-[-12px] w-2 h-4 animate-pulse-subtle ${isPlaying ? 'bg-[#1db954]/80' : 'bg-[#4a4a46]/80'}`}></span>
                     </span>
                   </div>
                 </div>
@@ -612,16 +632,16 @@ export default function Home() {
           </div>
 
           {/* Footer */}
-          <div className="flex justify-between items-center border-t border-[#3a3a36] pt-4 mt-4 text-xs">
+          <div className={`flex justify-between items-center border-t pt-4 mt-4 text-xs ${isPlaying ? 'border-[#1db954]/50' : 'border-[#3a3a36]'}`}>
             <div className="flex items-center h-6 overflow-hidden gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-[#4a4a46]/60" />
-              <p className="text-xs text-[#4a4a46]/70 transition-all duration-300 opacity-100 translate-y-0">
+              <Sparkles className={`w-3.5 h-3.5 ${isPlaying ? 'text-[#1db954]/60' : 'text-[#4a4a46]/60'}`} />
+              <p className={`text-xs transition-all duration-300 opacity-100 translate-y-0 ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>
                 Sempre aprendendo, sempre crescendo
               </p>
             </div>
             <a
               href="mailto:marceloexpress9@gmail.com"
-              className="px-3 py-1.5 border border-[#4a4a46]/50 rounded-sm hover:bg-[#4a4a46] hover:text-[#262624] transition-all text-[#4a4a46]/80 hover:border-[#4a4a46] flex items-center gap-1.5"
+              className={`px-3 py-1.5 border rounded-sm hover:bg-[#4a4a46] hover:text-[#262624] transition-all flex items-center gap-1.5 ${isPlaying ? 'border-[#1db954]/50 text-[#1db954]/80 hover:border-[#1db954] hover:bg-[#1db954] hover:text-white' : 'border-[#4a4a46]/50 text-[#4a4a46]/80 hover:border-[#4a4a46]'}`}
             >
               <Mail className="w-3.5 h-3.5" />
               <span>Contato</span>
