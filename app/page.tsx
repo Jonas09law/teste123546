@@ -215,15 +215,13 @@ export default function Home() {
               </div>
               <div>
                 <h1 className={`text-xl font-medium tracking-tight flex items-center gap-1.5 ${isPlaying ? 'text-[#1db954]' : 'text-[#4a4a46]'}`}>
-                  Marcelo Souza
-                  <Command className="w-3.5 h-3.5 text-[#4a4a46]/50" />
-                </h1>
-                <div className="flex items-center gap-1.5">
-                  <span className={`text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>Developer</span>
-                  <span className={`text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'} flex items-center gap-1`}>
+                  Marcelo Souza <span className={`text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'} flex items-center gap-1`}>
                     {statusText}
                     <span className={`w-2 h-2 rounded-full ${statusColor}`}></span>
                   </span>
+                </h1>
+                <div className="flex items-center gap-1.5">
+                  <span className={`text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>Developer</span>
                 </div>
               </div>
             </div>
@@ -673,4 +671,4 @@ export default function Home() {
       </main>
     </div>
   )
-}
+}s
