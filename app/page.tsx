@@ -18,16 +18,13 @@ import {
   Music,
 } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
-
 export default function Home() {
   // Lanyard Discord Activities
   const [lanyard, setLanyard] = useState<any>(null)
   const [isLoadingLanyard, setIsLoadingLanyard] = useState(false)
-
   useEffect(() => {
     setIsLoadingLanyard(true)
     const ws = new WebSocket("wss://api.lanyard.rest/socket")
-
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
       console.log("Dados recebidos do Lanyard WebSocket:", data)
@@ -36,7 +33,6 @@ export default function Home() {
         setIsLoadingLanyard(false)
       }
     }
-
     ws.onopen = () => {
       console.log("WebSocket do Lanyard conectado")
       ws.send(JSON.stringify({
@@ -48,12 +44,10 @@ export default function Home() {
       }, 30000)
       ws.heartbeatInterval = heartbeatInterval
     }
-
     ws.onerror = (error) => {
       console.error("Erro no WebSocket do Lanyard:", error)
       setIsLoadingLanyard(false)
     }
-
     ws.onclose = () => {
       console.log("WebSocket do Lanyard fechado, tentando reconectar...")
       setIsLoadingLanyard(false)
@@ -65,18 +59,15 @@ export default function Home() {
         newWs.onclose = ws.onclose
       }, 5000)
     }
-
     return () => {
       console.log("Limpando WebSocket do Lanyard")
       clearInterval(ws.heartbeatInterval)
       ws.close()
     }
   }, [])
-
   const avatarUrl = lanyard && lanyard.discord_user && lanyard.discord_user.avatar
-    ? `https://cdn.discordapp.com/avatars/${lanyard.discord_user.id}/${lanyard.discord_user.avatar}.${lanyard.discord_user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256`
+    ? `https://cdn.discordapp.com/avatars/${lanyard.discord_user.id}/${lanyard.discord_user.avatar}.${lanyard.discord_user.avatar.startsWith('a_')  ? 'gif' : 'png'}?size=256`
     : '/placeholder.svg'
-
   // Map Discord status to Portuguese and set status color
   const getStatusInfo = (status: string) => {
     switch (status) {
@@ -91,34 +82,27 @@ export default function Home() {
         return { color: "bg-gray-500", text: "Offline" }
     }
   }
-
   const discordStatus = lanyard?.discord_status || "offline"
   const { text: statusText, color: statusColor } = getStatusInfo(discordStatus)
-
   // GitHub Activity
   const [githubEvents, setGithubEvents] = useState<any[]>([])
   const [isLoadingGithubEvents, setIsLoadingGithubEvents] = useState(false)
-
   useEffect(() => {
     const fetchGithubEvents = () => {
       setIsLoadingGithubEvents(true)
-      fetch("https://api.github.com/users/zayzinha/events/public")
+      fetch("https://api.github.com/users/zayzinha/events/public") 
         .then(res => res.json())
         .then(data => Array.isArray(data) ? setGithubEvents(data.slice(0, 5)) : setGithubEvents([]))
         .catch(err => console.error("Erro ao carregar eventos do GitHub:", err))
         .finally(() => setIsLoadingGithubEvents(false))
     }
-
     fetchGithubEvents()
     const interval = setInterval(fetchGithubEvents, 60000)
-
     return () => clearInterval(interval)
   }, [])
-
   // GitHub stats
   const [githubStats, setGithubStats] = useState({ stars: 0, forks: 0, repos: 0 })
   const [isLoadingGithubStats, setIsLoadingGithubStats] = useState(false)
-
   useEffect(() => {
     const fetchGithubStats = () => {
       setIsLoadingGithubStats(true)
@@ -134,28 +118,21 @@ export default function Home() {
         .catch(err => console.error("Erro ao carregar estatísticas do GitHub:", err))
         .finally(() => setIsLoadingGithubStats(false))
     }
-
     fetchGithubStats()
     const interval = setInterval(fetchGithubStats, 60000)
-
     return () => clearInterval(interval)
   }, [])
-
   // Local Time
   const [currentTime, setCurrentTime] = useState(new Date())
-
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date())
     }, 1000)
-
     return () => clearInterval(interval)
   }, [])
-
   // Audio control
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
-
   const toggleAudio = () => {
     if (audioRef.current) {
       if (isPlaying) {
@@ -166,13 +143,11 @@ export default function Home() {
       setIsPlaying(!isPlaying)
     }
   }
-
   // Define gridColors at the top level
   const gridColors = [
-    "#3a3a36", "#444441", "#4a4a46", "#353532", "#393936",
+    "#3a3a36", "#444441", "#4a4a46", "#353532", "#393936", 
     "#2d2d2a", "#232321", "#363632", "#41413d", "#2a2a28"
   ]
-
   return (
     <div className="min-h-screen bg-[#262624] text-[#4a4a46] relative">
       <style>
@@ -204,14 +179,16 @@ export default function Home() {
                 <h1 className="text-xl font-medium tracking-tight text-[#4a4a46]">
                   Marcelo Souza{" "}
                   <span className="text-sm text-[#4a4a46]/70">
-                    ({statusText} <span className={`inline-block w-2 h-2 rounded-full ${statusColor}`}></span>)
+                    {/* Ordem alterada: Bolinha primeiro */}
+                    <span className={`inline-block w-2 h-2 rounded-full ${statusColor} mr-1`}></span>
+                    {statusText}
                   </span>
                 </h1>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
               <a
-                href="https://github.com/darkzinn2"
+                href="https://github.com/darkzinn2" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-6 h-6 flex items-center justify-center rounded-sm bg-[#1e1e1c] text-[#4a4a46]/70 hover:text-[#4a4a46] hover:bg-[#262624] transition-colors border border-[#3a3a36]"
@@ -220,7 +197,7 @@ export default function Home() {
                 <Github className="w-3.5 h-3.5" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://linkedin.com" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-6 h-6 flex items-center justify-center rounded-sm bg-[#1e1e1c] text-[#4a4a46]/70 hover:text-[#4a4a46] hover:bg-[#262624] transition-colors border border-[#3a3a36]"
@@ -229,7 +206,7 @@ export default function Home() {
                 <Linkedin className="w-3.5 h-3.5" />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://twitter.com" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-6 h-6 flex items-center justify-center rounded-sm bg-[#1e1e1c] text-[#4a4a46]/70 hover:text-[#4a4a46] hover:bg-[#262624] transition-colors border border-[#3a3a36]"
@@ -246,12 +223,10 @@ export default function Home() {
               </a>
             </div>
           </div>
-
           {/* Scroll indicator */}
           <div className="flex justify-center opacity-60 hover:opacity-100 transition-opacity">
             <ChevronDown className="w-5 h-5 animate-bounce" />
           </div>
-
           {/* Grid layout for widgets */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Spotify widget (mostra atividades do Lanyard) */}
@@ -277,7 +252,7 @@ export default function Home() {
                             ? (typeof activity.emoji === "string"
                                 ? <span className="text-4xl w-16 h-16 flex items-center justify-center">{activity.emoji}</span>
                                 : <img
-                                    src={`https://cdn.discordapp.com/emojis/${activity.emoji.id}.${activity.emoji.animated ? 'gif' : 'png'}`}
+                                    src={`https://cdn.discordapp.com/emojis/${activity.emoji.id}.${activity.emoji.animated  ? 'gif' : 'png'}`}
                                     alt={activity.emoji.name}
                                     className="w-10 h-10"
                                   />
@@ -296,9 +271,9 @@ export default function Home() {
                                 <img
                                   src={
                                     activity.assets.large_image.startsWith('mp:')
-                                      ? `https://media.discordapp.net/${activity.assets.large_image.replace('mp:', '')}`
+                                      ? `https://media.discordapp.net/${activity.assets.large_image.replace('mp:',  '')}`
                                       : activity.application_id
-                                        ? `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets.large_image}.png`
+                                        ? `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets.large_image}.png` 
                                         : '/placeholder.svg'
                                   }
                                   alt="activity"
@@ -340,7 +315,6 @@ export default function Home() {
                 )}
               </div>
             </div>
-
             {/* Audio widget */}
             <div className="sm:col-span-1 row-span-1">
               <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 hover:border-[#4a4a46]/50 transition-colors h-full flex flex-col group">
@@ -369,7 +343,6 @@ export default function Home() {
               </div>
               <audio ref={audioRef} src="/musicasite.mp3" preload="auto" />
             </div>
-
             {/* Skills widget */}
             <div className="sm:col-span-1 row-span-1">
               <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] px-3 py-2 hover:border-[#4a4a46]/50 transition-colors group h-auto flex flex-col">
@@ -398,7 +371,6 @@ export default function Home() {
                       <div className="h-[3px] rounded-full bg-[#4a4a46]/60" style={{ width: "90%" }}></div>
                     </div>
                   </div>
-
                   {/* Python */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
@@ -411,7 +383,6 @@ export default function Home() {
                       <div className="h-[3px] rounded-full bg-[#4a4a46]/60" style={{ width: "85%" }}></div>
                     </div>
                   </div>
-
                   {/* TypeScript */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
@@ -424,7 +395,6 @@ export default function Home() {
                       <div className="h-[3px] rounded-full bg-[#4a4a46]/60" style={{ width: "85%" }}></div>
                     </div>
                   </div>
-
                   {/* CSS */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
@@ -437,7 +407,6 @@ export default function Home() {
                       <div className="h-[3px] rounded-full bg-[#4a4a46]/60" style={{ width: "80%" }}></div>
                     </div>
                   </div>
-
                   {/* HTML */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
@@ -450,7 +419,6 @@ export default function Home() {
                       <div className="h-[3px] rounded-full bg-[#4a4a46]/60" style={{ width: "95%" }}></div>
                     </div>
                   </div>
-
                   {/* React */}
                   <div className="flex flex-col items-center justify-center gap-1 hover:bg-[#2a2a28]/20 p-1 rounded-md transition-colors">
                     <div className="relative w-6 h-6 flex items-center justify-center">
@@ -466,7 +434,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
             {/* GitHub activity */}
             <div className="sm:col-span-2 row-span-1">
               <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 h-full">
@@ -479,7 +446,7 @@ export default function Home() {
                     )}
                   </div>
                   <a
-                    href="https://github.com/darkzinn2"
+                    href="https://github.com/darkzinn2" 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs px-2 py-1 rounded bg-[#232321] border border-[#3a3a36] ml-auto text-[#4a4a46]/60 hover:text-[#4a4a46]"
@@ -512,7 +479,7 @@ export default function Home() {
                 <div className="flex justify-between items-center text-xs mt-2 text-[#4a4a46]/60">
                   <span>
                     <svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1.724 1.724 0 002.573.982c.797-.545 1.8.253 1.257 1.05a1.724 1.724 0 00.982 2.573c.921.3.921 1.603 0 1.902a1.724 1.724 0 00-.982 2.573c.545.797-.253 1.8-1.05 1.257a1.724 1.724 0 00-2.573.982c-.3.921-1.603.921-1.902 0a1.724 1.724 0 00-2.573-.982c-.797.545-1.8-.253-1.257-1.05a1.724 1.724 0 00-.982-2.573c-.921-.3-.921-1.603 0-1.902a1.724 1.724 0 00.982-2.573c-.545-.797.253-1.8 1.05-1.257.73.5 1.7.5 2.43 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1.724 1.724 0 002.573.982c.797-.545 1.8.253 1.257 1.05a1.724 1.724 0 00.982 2.573c.921.3.921 1.603 0 1.902a1.724 1.724 0 00-.982 2.573c-.545.797-.253 1.8-1.05 1.257a1.724 1.724 0 00-2.573.982c-.3.921-1.603.921-1.902 0a1.724 1.724 0 00-2.573-.982c-.797.545-1.8-.253-1.257-1.05a1.724 1.724 0 00-.982-2.573c-.921-.3-.921-1.603 0-1.902a1.724 1.724 0 00.982-2.573c-.545-.797.253-1.8 1.05-1.257.73.5 1.7.5 2.43 0z" />
                     </svg> 
                     {isLoadingGithubStats ? "..." : githubStats.stars} stars
                   </span>
@@ -532,7 +499,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
             {/* Local time widget */}
             <div className="sm:col-span-1 row-span-1">
               <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 hover:border-[#4a4a46]/50 transition-colors h-full flex flex-col group">
@@ -571,7 +537,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
             {/* Information link */}
             <div className="sm:col-span-3">
               <Link
@@ -587,7 +552,6 @@ export default function Home() {
                 </span>
               </Link>
             </div>
-
             {/* Terminal */}
             <div className="sm:col-span-3">
               <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] overflow-hidden">
@@ -634,7 +598,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
           {/* Footer */}
           <div className="flex justify-between items-center border-t pt-4 mt-4 text-xs border-[#3a3a36]">
             <div className="flex items-center h-6 overflow-hidden gap-1">
