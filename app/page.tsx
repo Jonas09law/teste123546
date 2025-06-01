@@ -77,6 +77,24 @@ export default function Home() {
     ? `https://cdn.discordapp.com/avatars/${lanyard.discord_user.id}/${lanyard.discord_user.avatar}.${lanyard.discord_user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256`
     : '/placeholder.svg'
 
+  // Map Discord status to Portuguese and set status color
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case "online":
+        return { text: "Online", color: "bg-green-500" }
+      case "idle":
+        return { text: "Ausente", color: "bg-yellow-500" }
+      case "dnd":
+        return { text: "Não Perturbe", color: "bg-red-500" }
+      case "offline":
+      default:
+        return { text: "Offline", color: "bg-gray-500" }
+    }
+  }
+
+  const discordStatus = lanyard?.discord_status || "offline"
+  const { text: statusText, color: statusColor } = getStatusInfo(discordStatus)
+
   // GitHub Activity
   const [githubEvents, setGithubEvents] = useState<any[]>([])
   const [isLoadingGithubEvents, setIsLoadingGithubEvents] = useState(false)
@@ -202,6 +220,10 @@ export default function Home() {
                 </h1>
                 <div className="flex items-center gap-1.5">
                   <span className={`text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'}`}>Developer</span>
+                  <span className={`text-xs ${isPlaying ? 'text-[#1db954]/70' : 'text-[#4a4a46]/70'} flex items-center gap-1`}>
+                    {statusText}
+                    <span className={`w-2 h-2 rounded-full ${statusColor}`}></span>
+                  </span>
                 </div>
               </div>
             </div>
