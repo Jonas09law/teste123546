@@ -167,6 +167,12 @@ export default function Home() {
     }
   }
 
+  // Define gridColors at the top level
+  const gridColors = [
+    "#3a3a36", "#444441", "#4a4a46", "#353532", "#393936",
+    "#2d2d2a", "#232321", "#363632", "#41413d", "#2a2a28"
+  ]
+
   return (
     <div className="min-h-screen bg-[#262624] text-[#4a4a46] relative">
       <style>
