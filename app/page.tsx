@@ -188,7 +188,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-1.5">
               <a
-                href="https://github.com/darkzinn2" 
+                href="https://github.com/marceloexpress" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-6 h-6 flex items-center justify-center rounded-sm bg-[#1e1e1c] text-[#4a4a46]/70 hover:text-[#4a4a46] hover:bg-[#262624] transition-colors border border-[#3a3a36]"
@@ -446,12 +446,12 @@ export default function Home() {
                     )}
                   </div>
                   <a
-                    href="https://github.com/darkzinn2" 
+                    href="https://github.com/marceloexpress" 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs px-2 py-1 rounded bg-[#232321] border border-[#3a3a36] ml-auto text-[#4a4a46]/60 hover:text-[#4a4a46]"
                   >
-                    @darkzinn2
+                    @marceloexpress
                   </a>
                 </div>
                 <div className="flex justify-center items-center w-full">
