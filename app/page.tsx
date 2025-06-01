@@ -177,7 +177,7 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-xl font-medium tracking-tight text-[#4a4a46]">
-                  Marcelo Souza{" "}
+                  Marcelo Souza | {" "}
                   <span className="text-sm text-[#4a4a46]/70">
                     {/* Ordem alterada: Bolinha primeiro */}
                     <span className={`inline-block w-2 h-2 rounded-full ${statusColor} mr-1`}></span>
