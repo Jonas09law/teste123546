@@ -81,14 +81,14 @@ export default function Home() {
   const getStatusInfo = (status: string) => {
     switch (status) {
       case "online":
-        return { text: "Online", color: "bg-green-500" }
+        return { color: "bg-green-500", text: "Online" }
       case "idle":
-        return { text: "Ausente", color: "bg-yellow-500" }
+        return { color: "bg-yellow-500", text: "Ausente" }
       case "dnd":
-        return { text: "Não Perturbe", color: "bg-red-500" }
+        return { color: "bg-red-500", text: "Não Perturbe" }
       case "offline":
       default:
-        return { text: "Offline", color: "bg-gray-500" }
+        return { color: "bg-gray-500", text: "Offline" }
     }
   }
 
@@ -201,15 +201,12 @@ export default function Home() {
                 <img src={avatarUrl} alt="Avatar" className="object-cover w-10 h-10" />
               </div>
               <div>
-                <h1 className="text-xl font-medium tracking-tight flex items-center gap-1.5 text-[#4a4a46]">
-                  Marcelo Souza <span className="text-xs text-[#4a4a46]/70 flex items-center gap-1">
-                    {statusText}
-                    <span className={`w-2 h-2 rounded-full ${statusColor}`}></span>
+                <h1 className="text-xl font-medium tracking-tight text-[#4a4a46]">
+                  Marcelo Souza{" "}
+                  <span className="text-sm text-[#4a4a46]/70">
+                    ({statusText} <span className={`inline-block w-2 h-2 rounded-full ${statusColor}`}></span>)
                   </span>
                 </h1>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-[#4a4a46]/70">Developer</span>
-                </div>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
