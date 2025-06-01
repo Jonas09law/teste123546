@@ -90,7 +90,7 @@ export default function Home() {
   useEffect(() => {
     const fetchGithubEvents = () => {
       setIsLoadingGithubEvents(true)
-      fetch("https://api.github.com/users/zayzinha/events/public") 
+      fetch("https://api.github.com/users/marceloexpress/events/public") 
         .then(res => res.json())
         .then(data => Array.isArray(data) ? setGithubEvents(data.slice(0, 5)) : setGithubEvents([]))
         .catch(err => console.error("Erro ao carregar eventos do GitHub:", err))
@@ -106,7 +106,7 @@ export default function Home() {
   useEffect(() => {
     const fetchGithubStats = () => {
       setIsLoadingGithubStats(true)
-      fetch('https://api.github.com/users/zayzinha/repos?per_page=100')
+      fetch('https://api.github.com/users/marceloexpress/repos?per_page=100')
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
