@@ -1,5 +1,4 @@
 "use client"
-
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -19,43 +18,36 @@ import {
   Music,
 } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
-
 export default function Home() {
   // Lanyard Discord Activities
   const [lanyard, setLanyard] = useState<any>(null)
   const [isLoadingLanyard, setIsLoadingLanyard] = useState(false)
-
   useEffect(() => {
     setIsLoadingLanyard(true)
     const ws = new WebSocket("wss://api.lanyard.rest/socket")
-
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
+      console.log("Dados recebidos do Lanyard WebSocket:", data)
       if (data.t === "INIT_STATE" || data.t === "PRESENCE_UPDATE") {
         setLanyard(data.d)
         setIsLoadingLanyard(false)
       }
     }
-
     ws.onopen = () => {
+      console.log("WebSocket do Lanyard conectado")
       ws.send(JSON.stringify({
         op: 2,
         d: { subscribe_to_id: "1113945518071107705" },
       }))
-
       const heartbeatInterval = setInterval(() => {
         ws.send(JSON.stringify({ op: 3 }))
       }, 30000)
-
-      // @ts-ignore
       ws.heartbeatInterval = heartbeatInterval
     }
-
     ws.onerror = (error) => {
       console.error("Erro no WebSocket do Lanyard:", error)
       setIsLoadingLanyard(false)
     }
-
     ws.onclose = () => {
       console.log("WebSocket do Lanyard fechado, tentando reconectar...")
       setIsLoadingLanyard(false)
@@ -67,39 +59,38 @@ export default function Home() {
         newWs.onclose = ws.onclose
       }, 5000)
     }
-
     return () => {
-      // @ts-ignore
+      console.log("Limpando WebSocket do Lanyard")
       clearInterval(ws.heartbeatInterval)
       ws.close()
     }
   }, [])
-
   const avatarUrl = lanyard && lanyard.discord_user && lanyard.discord_user.avatar
-    ? `https://cdn.discordapp.com/avatars/${lanyard.discord_user.id}/${lanyard.discord_user.avatar}.${lanyard.discord_user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256`
+    ? `https://cdn.discordapp.com/avatars/${lanyard.discord_user.id}/${lanyard.discord_user.avatar}.${lanyard.discord_user.avatar.startsWith('a_')  ? 'gif' : 'png'}?size=256`
     : '/placeholder.svg'
-
-  // Map Discord status to Portuguese
+  // Map Discord status to Portuguese and set status color
   const getStatusInfo = (status: string) => {
     switch (status) {
-      case "online": return { color: "bg-green-500", text: "Online" }
-      case "idle": return { color: "bg-yellow-500", text: "Ausente" }
-      case "dnd": return { color: "bg-red-500", text: "Não Perturbe" }
+      case "online":
+        return { color: "bg-green-500", text: "Online" }
+      case "idle":
+        return { color: "bg-yellow-500", text: "Ausente" }
+      case "dnd":
+        return { color: "bg-red-500", text: "Não Perturbe" }
       case "offline":
-      default: return { color: "bg-gray-500", text: "Offline" }
+      default:
+        return { color: "bg-gray-500", text: "Offline" }
     }
   }
-
   const discordStatus = lanyard?.discord_status || "offline"
   const { text: statusText, color: statusColor } = getStatusInfo(discordStatus)
-
   // GitHub Activity
   const [githubEvents, setGithubEvents] = useState<any[]>([])
   const [isLoadingGithubEvents, setIsLoadingGithubEvents] = useState(false)
   useEffect(() => {
     const fetchGithubEvents = () => {
       setIsLoadingGithubEvents(true)
-      fetch("https://api.github.com/users/marceloexpress/events/public")
+      fetch("https://api.github.com/users/marceloexpress/events/public") 
         .then(res => res.json())
         .then(data => Array.isArray(data) ? setGithubEvents(data.slice(0, 5)) : setGithubEvents([]))
         .catch(err => console.error("Erro ao carregar eventos do GitHub:", err))
@@ -109,45 +100,6 @@ export default function Home() {
     const interval = setInterval(fetchGithubEvents, 60000)
     return () => clearInterval(interval)
   }, [])
-
-  // Spotify Music
-  const [spotify, setSpotify] = useState<{
-    playing: boolean
-    name?: string
-    artist?: string
-    image?: string
-    preview_url?: string
-  }>({ playing: false })
-  const [isPlaying, setIsPlaying] = useState(false)
-  const audioRef = useRef<HTMLAudioElement>(null)
-
-  useEffect(() => {
-    const fetchSpotify = async () => {
-      try {
-        const res = await fetch("/api/spotify")
-        const data = await res.json()
-        setSpotify(data)
-      } catch (err) {
-        console.error("Erro ao buscar música do Spotify:", err)
-      }
-    }
-    fetchSpotify()
-    const interval = setInterval(fetchSpotify, 10000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const toggleAudio = () => {
-    if (!audioRef.current) return
-    if (isPlaying) {
-      audioRef.current.pause()
-      setIsPlaying(false)
-    } else {
-      audioRef.current.src = spotify.playing && spotify.preview_url ? spotify.preview_url : "/musicasite.mp3"
-      audioRef.current.play().catch(err => console.error(err))
-      setIsPlaying(true)
-    }
-  }
-
   // GitHub stats
   const [githubStats, setGithubStats] = useState({ stars: 0, forks: 0, repos: 0 })
   const [isLoadingGithubStats, setIsLoadingGithubStats] = useState(false)
@@ -170,16 +122,30 @@ export default function Home() {
     const interval = setInterval(fetchGithubStats, 60000)
     return () => clearInterval(interval)
   }, [])
-
   // Local Time
   const [currentTime, setCurrentTime] = useState(new Date())
   useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 1000)
+    const interval = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
     return () => clearInterval(interval)
   }, [])
-
+  // Audio control
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const toggleAudio = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause()
+      } else {
+        audioRef.current.play().catch(err => console.error("Erro ao tocar áudio:", err))
+      }
+      setIsPlaying(!isPlaying)
+    }
+  }
+  // Define gridColors at the top level
   const gridColors = [
-    "#3a3a36", "#444441", "#4a4a46", "#353532", "#393936",
+    "#3a3a36", "#444441", "#4a4a46", "#353532", "#393936", 
     "#2d2d2a", "#232321", "#363632", "#41413d", "#2a2a28"
   ]
   return (
@@ -349,23 +315,33 @@ export default function Home() {
                 )}
               </div>
             </div>
-            {/* Audio Widget */}
+            {/* Audio widget */}
             <div className="sm:col-span-1 row-span-1">
-              <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 flex flex-col items-center justify-center">
-                <button
-                  onClick={toggleAudio}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-[#232321] rounded-md border border-[#3a3a36] text-[#4a4a46] hover:bg-[#4a4a46] hover:text-[#262624] transition-colors"
-                >
-                  {isPlaying ? "Pausar" : "Tocar"} <Music className="w-4 h-4" />
-                </button>
-                {spotify.playing && spotify.name && (
-                  <div className="mt-2 text-center text-xs text-[#4a4a46]/70">
-                    <div className="font-semibold text-[#1db954]">{spotify.name}</div>
-                    <div>{spotify.artist}</div>
+              <div className="bg-[#1e1e1c] rounded-md border border-[#3a3a36] p-3 hover:border-[#4a4a46]/50 transition-colors h-full flex flex-col group">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Music className="w-3.5 h-3.5 text-[#4a4a46]/80" />
+                    <span className="text-xs text-[#4a4a46]/80 group-hover:text-[#4a4a46] transition-colors">
+                      Música
+                    </span>
                   </div>
-                )}
-                <audio ref={audioRef} preload="auto" />
+                </div>
+                <div className="flex-1 flex flex-col items-center justify-center">
+                  <button
+                    onClick={toggleAudio}
+                    aria-label={isPlaying ? "Pausar música" : "Tocar música"}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-[#232321] rounded-md border border-[#3a3a36] text-[#4a4a46] hover:bg-[#4a4a46] hover:text-[#262624] transition-colors"
+                  >
+                    {isPlaying ? (
+                      <span>Pausar</span>
+                    ) : (
+                      <span>Tocar</span>
+                    )}
+                    <Music className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
+              <audio ref={audioRef} src="/musicasite.mp3" preload="auto" />
             </div>
             {/* Skills widget */}
             <div className="sm:col-span-1 row-span-1">
